@@ -13,7 +13,7 @@ export function usePhishingAnalysis() {
     wsRef.current?.close()
   }, [])
 
-  const startWebSocket = () =>
+  const startWebSocket = (payload: PhishingAnalysisRequest) =>
     new Promise<void>((resolve, reject) => {
       try {
         wsRef.current = createAnalysisWebSocket(
@@ -28,10 +28,28 @@ export function usePhishingAnalysis() {
             }
           },
           (err) => {
-            toast.error('WebSocket error')
+            console.error('WS Error', err)
+            // If WS fails, we can reject, but we might want to fallback to REST?
+            // For now, let's reject so the catch block handles it (which sadly just errors)
+            // But technically we proceed to REST in runAnalysis if we didn't await this?
+            // The logic requires this to resolve.
             reject(err)
           }
         )
+
+        // Send payload when ready
+        const sendPayload = () => {
+          if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify(payload))
+          }
+        }
+
+        if (wsRef.current.readyState === WebSocket.OPEN) {
+          sendPayload()
+        } else {
+          wsRef.current.addEventListener('open', sendPayload)
+        }
+
       } catch (err) {
         reject(err)
       }
@@ -42,12 +60,30 @@ export function usePhishingAnalysis() {
     setResult(null)
     setProgress({ step: 'Queued', percent: 0 })
     try {
-      await startWebSocket()
-      const restRes = await analyzeEmail(payload)
-      setResult(restRes)
-      setProgress(null)
+      // Try WebSocket first
+      await startWebSocket(payload)
+
+      // Note: original code called analyzeEmail(payload) AFTER WebSocket resolved.
+      // This seems redundant if WS returns the result. 
+      // However, if WS is just for progress and result comes from there, we are good.
+      // If WS is PURELY for progress and we MUST call REST for result, then startWebSocket shouldn't resolve on result.
+      // BUT current backend sends 'result' type on WS.
+      // So we have the result.
+
+      // If we want to be safe and follow original flow (maybe WS result is partial?):
+      // const restRes = await analyzeEmail(payload)
+      // setResult(restRes)
+
     } catch (err: any) {
-      toast.error(err?.message ?? 'Analysis failed')
+      console.warn('WS failed, falling back to REST', err)
+      // Fallback to REST analysis if WS fails
+      try {
+        const restRes = await analyzeEmail(payload)
+        setResult(restRes)
+        setProgress(null)
+      } catch (restErr: any) {
+        toast.error(restErr?.message ?? 'Analysis failed')
+      }
     } finally {
       setLoading(false)
     }

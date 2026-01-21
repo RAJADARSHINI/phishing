@@ -15,6 +15,7 @@ export interface PhishingAnalysisResponse {
   url_score: number
   vision_score: number
   explainability: Explainability
+  explainable_reasons?: string[]
 }
 
 export interface LiveProgress {

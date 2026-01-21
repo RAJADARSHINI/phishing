@@ -1,7 +1,7 @@
 import type { PhishingAnalysisRequest, PhishingAnalysisResponse } from '../types/phishing.types'
 
 export async function analyzeEmail(payload: PhishingAnalysisRequest): Promise<PhishingAnalysisResponse> {
-  const res = await fetch('/analyze_email', {
+  const res = await fetch('/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
