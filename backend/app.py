@@ -70,13 +70,23 @@ class Explainability(BaseModel):
     factors: List[str]
     warnings: List[str]
 
+class Evidence(BaseModel):
+    indicator: str
+    evidence: str
+    reason: str
+    weight: float
+
 class PhishingAnalysisResponse(BaseModel):
     risk_score: float
     nlp_score: float
     url_score: float
     vision_score: float
+    risk_level: str
+    verdict: str
     explainability: Explainability
     explainable_reasons: List[str]
+    explainable_ai: List[Evidence]
+    analysis_summary: str
 
 # Helper
 def extract_urls_from_text(text: str) -> List[str]:
@@ -119,13 +129,19 @@ async def perform_analysis(request: PhishingAnalysisRequest) -> PhishingAnalysis
             warnings=result['warnings']
         )
         
+        # CRITICAL: Backend returns scores in 0-100 range, but frontend expects 0-1 range
+        # Convert by dividing by 100
         return PhishingAnalysisResponse(
-            risk_score=result['risk_score'],
-            nlp_score=result['nlp_score'],
-            url_score=result['url_score'],
-            vision_score=result['vision_score'],
+            risk_score=result['risk_score'] / 100.0,
+            nlp_score=result['nlp_score'] / 100.0,
+            url_score=result['url_score'] / 100.0,
+            vision_score=result['vision_score'] / 100.0,
+            risk_level=result['risk_level'],
+            verdict=result['verdict'],
             explainability=explainability,
-            explainable_reasons=result['factors']
+            explainable_reasons=result['factors'],
+            explainable_ai=[Evidence(**ev) for ev in result['explainable_ai']],
+            analysis_summary=result['analysis_summary']
         )
     except Exception as e:
         logger.error(f"Analysis failed: {e}")

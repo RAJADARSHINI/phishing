@@ -1,0 +1,60 @@
+﻿
+============================================================
+TESTING EXPLAINABLE AI THREAT ANALYSIS ENGINE
+============================================================
+
+Scanning Input...
+
+SUCCESS - ANALYSIS COMPLETE
+Risk Level: HIGH
+Unified Risk Score: 0.76
+Verdict: THREAT
+
+Summary: Text analysis detected 8 threat indicators. URL analysis identified suspicious patterns. Overall risk level: HIGH
+
+INDICATOR DETAILS:
+------------------------------
+Indicator: Urgency / Time Pressure
+Evidence:  ...suspended immediately unless you verify your identi...
+Reason:    Message creates artificial time pressure to bypass rational decision-making
+Weight:    0.2
+------------------------------
+Indicator: Fear / Loss Threat
+Evidence:  ...s will be suspended immediately unless you verify...
+Reason:    Threatens negative consequences to induce panic-driven compliance
+Weight:    0.2
+------------------------------
+Indicator: Authority Impersonation
+Evidence:  ...y on your security department account. Your access will be...
+Reason:    Falsely claims to represent trusted authority to gain compliance
+Weight:    0.2
+------------------------------
+Indicator: Coercive Action Request
+Evidence:  ...24 hours. Click here to secure your account: http:...
+Reason:    Demands immediate action without allowing verification or consideration
+Weight:    0.15
+------------------------------
+Indicator: Unverifiable Sender Identity
+Evidence:  Dear account holder, we noticed unusual activity...
+Reason:    Uses generic salutation instead of personalized information
+Weight:    0.15
+------------------------------
+Indicator: Ambiguous Security Claim
+Evidence:  ...e noticed unusual activity on your security department a...
+Reason:    Makes vague security claims without specific verifiable details
+Weight:    0.1
+------------------------------
+Indicator: IP-based URL
+Evidence:  192.168.1.50
+Reason:    Legitimate sites use domain names, not IP addresses
+Weight:    0.4
+------------------------------
+Indicator: Suspicious Keywords
+Evidence:  login
+Reason:    URL contains credential-harvesting related terms
+Weight:    0.05
+------------------------------
+
+Math Validation:
+  NLP (1.00 * 0.6) + URL (0.40 * 0.4) = 0.76
+  [PASS] Unified Score Calculation is mathematically correct
